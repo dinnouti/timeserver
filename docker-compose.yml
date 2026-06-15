@@ -1,7 +1,6 @@
 services:
   timeserver:
-    build: .
-    image: timeserver:latest
+    image: ghcr.io/dinnouti/timeserver:latest
     container_name: timeserver
     restart: unless-stopped
     expose:
