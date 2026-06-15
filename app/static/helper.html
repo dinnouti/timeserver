@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>Timeserver URL Builder</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" integrity="sha384-OXVF05DQEe311p6ohU11NwlnX08FzMCsyoXzGOaL+83dKAb3qS17yZJxESl8YrJQ" crossorigin="anonymous">
 <style>
   body {
     font-family: system-ui, sans-serif;
@@ -16,6 +17,10 @@
   label { min-width: 100px; }
   select, input { padding: 6px 8px; font-size: 14px; }
   select { min-width: 280px; }
+  .select2-container { min-width: 280px; }
+  .select2-container--default .select2-selection--single { height: 32px; }
+  .select2-container--default .select2-selection--single .select2-selection__rendered { line-height: 30px; }
+  .select2-container--default .select2-selection--single .select2-selection__arrow { height: 30px; }
   .url-box {
     width: 100%;
     box-sizing: border-box;
@@ -46,7 +51,7 @@
 </div>
 
 <div class="row">
-  <label for="url">Signature URL</label>
+  <label for="url">Signature URL (PNG)</label>
 </div>
 <input id="url" class="url-box" readonly>
 <div class="row">
@@ -54,19 +59,45 @@
   <span id="copied" class="help" style="display:none;">Copied!</span>
 </div>
 
+<div class="row">
+  <label for="urlHtml">HTML URL</label>
+</div>
+<input id="urlHtml" class="url-box" readonly>
+<div class="row">
+  <button id="copyHtml">Copy URL</button>
+  <span id="copiedHtml" class="help" style="display:none;">Copied!</span>
+</div>
+
+<div class="row">
+  <label for="urlImg">&lt;img&gt; tag</label>
+</div>
+<input id="urlImg" class="url-box" readonly>
+<div class="row">
+  <button id="copyImg">Copy tag</button>
+  <span id="copiedImg" class="help" style="display:none;">Copied!</span>
+</div>
+
 <div class="preview">
   <div class="help">Live preview (refreshes every 30 s):</div>
   <img id="preview" alt="time preview">
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js" integrity="sha384-1H217gwSVyLSIfaLxHbE7dRb3v4mYCKbpQvzx0cegeju1MVsGrX5xXxAvs/HgeFs" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js" integrity="sha384-d3UHjPdzJkZuk5H3qKYMLRyWLAQBJbby2yr2Q58hXXtAGF8RSNO9jpLDlKKPv5v3" crossorigin="anonymous"></script>
 <script>
   const tzSel = document.getElementById('tz');
   const startInp = document.getElementById('start');
   const endInp = document.getElementById('end');
   const urlInp = document.getElementById('url');
+  const urlHtmlInp = document.getElementById('urlHtml');
+  const urlImgInp = document.getElementById('urlImg');
   const previewImg = document.getElementById('preview');
   const copyBtn = document.getElementById('copy');
   const copiedNote = document.getElementById('copied');
+  const copyHtmlBtn = document.getElementById('copyHtml');
+  const copiedHtmlNote = document.getElementById('copiedHtml');
+  const copyImgBtn = document.getElementById('copyImg');
+  const copiedImgNote = document.getElementById('copiedImg');
 
   const zones = (typeof Intl.supportedValuesOf === 'function')
     ? Intl.supportedValuesOf('timeZone')
@@ -79,19 +110,22 @@
     if (z === guessed) opt.selected = true;
     tzSel.appendChild(opt);
   }
+  jQuery(tzSel).select2({ width: 'resolve' });
 
-  function buildUrl() {
+  function buildUrl(path) {
     const params = new URLSearchParams({
       tz: tzSel.value,
       start: startInp.value,
       end: endInp.value,
     });
-    return `${location.origin}/time.png?${params.toString()}`;
+    return `${location.origin}${path}?${params.toString()}`;
   }
 
   function refresh() {
-    const url = buildUrl();
+    const url = buildUrl('/time.png');
     urlInp.value = url;
+    urlHtmlInp.value = buildUrl('/time.html');
+    urlImgInp.value = `<img src="${url}" alt="time">`;
     previewImg.src = `${url}&_=${Date.now()}`;
   }
 
@@ -100,16 +134,21 @@
     el.addEventListener('input', refresh);
   }
 
-  copyBtn.addEventListener('click', async () => {
-    try {
-      await navigator.clipboard.writeText(urlInp.value);
-      copiedNote.style.display = 'inline';
-      setTimeout(() => { copiedNote.style.display = 'none'; }, 1500);
-    } catch (e) {
-      urlInp.select();
-      document.execCommand('copy');
-    }
-  });
+  function wireCopy(btn, input, note) {
+    btn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(input.value);
+        note.style.display = 'inline';
+        setTimeout(() => { note.style.display = 'none'; }, 1500);
+      } catch (e) {
+        input.select();
+        document.execCommand('copy');
+      }
+    });
+  }
+  wireCopy(copyBtn, urlInp, copiedNote);
+  wireCopy(copyHtmlBtn, urlHtmlInp, copiedHtmlNote);
+  wireCopy(copyImgBtn, urlImgInp, copiedImgNote);
 
   refresh();
   setInterval(refresh, 30000);

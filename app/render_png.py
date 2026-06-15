@@ -6,8 +6,8 @@ from PIL import Image, ImageDraw, ImageFont
 
 from .time_logic import TimeState
 
-WIDTH = 480
-HEIGHT = 200
+WIDTH = 240
+HEIGHT = 100
 
 WORKING_BG = (255, 244, 196)
 WORKING_FG = (60, 50, 0)
@@ -37,8 +37,8 @@ def render_png(state: TimeState) -> bytes:
     img = Image.new("RGB", (WIDTH, HEIGHT), bg)
     draw = ImageDraw.Draw(img)
 
-    time_font = _load_font(TEXT_FONT_PATH, 64)
-    sub_font = _load_font(TEXT_FONT_PATH_REGULAR, 20)
+    time_font = _load_font(TEXT_FONT_PATH, 32)
+    sub_font = _load_font(TEXT_FONT_PATH_REGULAR, 10)
 
     emoji_layer = Image.new("RGBA", (EMOJI_FONT_NATIVE_SIZE, EMOJI_FONT_NATIVE_SIZE), (0, 0, 0, 0))
     emoji_draw = ImageDraw.Draw(emoji_layer)
@@ -49,16 +49,16 @@ def render_png(state: TimeState) -> bytes:
         emoji_font = _load_font(TEXT_FONT_PATH, 80)
         emoji_draw.text((0, 0), glyph, font=emoji_font, fill=fg)
 
-    target_emoji_size = 110
+    target_emoji_size = 45
     emoji_scaled = emoji_layer.resize((target_emoji_size, target_emoji_size), Image.LANCZOS)
-    emoji_x = 24
+    emoji_x = 12
     emoji_y = (HEIGHT - target_emoji_size) // 2
     img.paste(emoji_scaled, (emoji_x, emoji_y), emoji_scaled)
 
-    text_x = emoji_x + target_emoji_size + 24
-    draw.text((text_x, 28), state.time_str, font=time_font, fill=fg)
-    draw.text((text_x, 110), state.date_str, font=sub_font, fill=fg)
-    draw.text((text_x, 140), state.tz_label, font=sub_font, fill=fg)
+    text_x = emoji_x + target_emoji_size + 12
+    draw.text((text_x, 14), state.time_str, font=time_font, fill=fg)
+    draw.text((text_x, 55), state.date_str, font=sub_font, fill=fg)
+    draw.text((text_x, 70), state.tz_label, font=sub_font, fill=fg)
 
     buf = io.BytesIO()
     img.save(buf, format="PNG", optimize=True)

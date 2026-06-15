@@ -63,7 +63,7 @@ def compute_state(
     tz_label = f"{tz} {abbrev}".strip()
 
     return TimeState(
-        time_str=local_now.strftime("%H:%M"),
+        time_str=local_now.strftime("%-I:%M %p").lower(),
         date_str=local_now.strftime("%A, %B %-d %Y"),
         tz_label=tz_label,
         is_working=_is_within_window(local_now.time(), start_t, end_t),
