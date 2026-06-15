@@ -1,0 +1,21 @@
+services:
+  timeserver:
+    build: .
+    image: timeserver:latest
+    container_name: timeserver
+    restart: unless-stopped
+    expose:
+      - "8000"
+    # Add Traefik labels and external network here, e.g.:
+    # networks:
+    #   - traefik
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.http.routers.timeserver.rule=Host(`time.example.com`)"
+    #   - "traefik.http.routers.timeserver.entrypoints=websecure"
+    #   - "traefik.http.routers.timeserver.tls.certresolver=letsencrypt"
+    #   - "traefik.http.services.timeserver.loadbalancer.server.port=8000"
+
+# networks:
+#   traefik:
+#     external: true

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Timeserver URL Builder</title>
+<style>
+  body {
+    font-family: system-ui, sans-serif;
+    max-width: 720px;
+    margin: 32px auto;
+    padding: 0 16px;
+    color: #222;
+  }
+  h1 { font-size: 22px; margin-bottom: 8px; }
+  .row { display: flex; gap: 12px; align-items: center; margin: 12px 0; flex-wrap: wrap; }
+  label { min-width: 100px; }
+  select, input { padding: 6px 8px; font-size: 14px; }
+  select { min-width: 280px; }
+  .url-box {
+    width: 100%;
+    box-sizing: border-box;
+    font-family: ui-monospace, monospace;
+    font-size: 13px;
+    padding: 8px;
+    word-break: break-all;
+  }
+  button { padding: 8px 14px; font-size: 14px; cursor: pointer; }
+  .preview { border: 1px solid #ddd; padding: 8px; margin-top: 16px; background: #fafafa; }
+  .preview img { display: block; max-width: 100%; }
+  .help { color: #666; font-size: 13px; }
+</style>
+</head>
+<body>
+<h1>Timeserver URL Builder</h1>
+<p class="help">Pick a timezone and your working hours. Copy the resulting URL into your email signature as the <code>src</code> of an <code>&lt;img&gt;</code> tag.</p>
+
+<div class="row">
+  <label for="tz">Timezone</label>
+  <select id="tz"></select>
+</div>
+<div class="row">
+  <label for="start">Start</label>
+  <input id="start" type="time" value="09:00">
+  <label for="end">End</label>
+  <input id="end" type="time" value="17:00">
+</div>
+
+<div class="row">
+  <label for="url">Signature URL</label>
+</div>
+<input id="url" class="url-box" readonly>
+<div class="row">
+  <button id="copy">Copy URL</button>
+  <span id="copied" class="help" style="display:none;">Copied!</span>
+</div>
+
+<div class="preview">
+  <div class="help">Live preview (refreshes every 30 s):</div>
+  <img id="preview" alt="time preview">
+</div>
+
+<script>
+  const tzSel = document.getElementById('tz');
+  const startInp = document.getElementById('start');
+  const endInp = document.getElementById('end');
+  const urlInp = document.getElementById('url');
+  const previewImg = document.getElementById('preview');
+  const copyBtn = document.getElementById('copy');
+  const copiedNote = document.getElementById('copied');
+
+  const zones = (typeof Intl.supportedValuesOf === 'function')
+    ? Intl.supportedValuesOf('timeZone')
+    : ['UTC', 'America/New_York', 'America/Los_Angeles', 'Europe/London', 'Europe/Madrid', 'Asia/Tokyo'];
+  const guessed = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+  for (const z of zones) {
+    const opt = document.createElement('option');
+    opt.value = z;
+    opt.textContent = z;
+    if (z === guessed) opt.selected = true;
+    tzSel.appendChild(opt);
+  }
+
+  function buildUrl() {
+    const params = new URLSearchParams({
+      tz: tzSel.value,
+      start: startInp.value,
+      end: endInp.value,
+    });
+    return `${location.origin}/time.png?${params.toString()}`;
+  }
+
+  function refresh() {
+    const url = buildUrl();
+    urlInp.value = url;
+    previewImg.src = `${url}&_=${Date.now()}`;
+  }
+
+  for (const el of [tzSel, startInp, endInp]) {
+    el.addEventListener('change', refresh);
+    el.addEventListener('input', refresh);
+  }
+
+  copyBtn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(urlInp.value);
+      copiedNote.style.display = 'inline';
+      setTimeout(() => { copiedNote.style.display = 'none'; }, 1500);
+    } catch (e) {
+      urlInp.select();
+      document.execCommand('copy');
+    }
+  });
+
+  refresh();
+  setInterval(refresh, 30000);
+</script>
+</body>
+</html>
