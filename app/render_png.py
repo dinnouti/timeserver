@@ -19,6 +19,7 @@ TEXT_FONT_PATH_REGULAR = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 EMOJI_FONT_PATH = "/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf"
 
 EMOJI_FONT_NATIVE_SIZE = 109
+EMOJI_CANVAS_PADDING = 20
 
 
 def _load_font(path: str, size: int) -> ImageFont.FreeTypeFont:
@@ -40,7 +41,8 @@ def render_png(state: TimeState) -> bytes:
     time_font = _load_font(TEXT_FONT_PATH, 32)
     sub_font = _load_font(TEXT_FONT_PATH_REGULAR, 12)
 
-    emoji_layer = Image.new("RGBA", (EMOJI_FONT_NATIVE_SIZE, EMOJI_FONT_NATIVE_SIZE), (0, 0, 0, 0))
+    emoji_canvas_size = EMOJI_FONT_NATIVE_SIZE + EMOJI_CANVAS_PADDING
+    emoji_layer = Image.new("RGBA", (emoji_canvas_size, emoji_canvas_size), (0, 0, 0, 0))
     emoji_draw = ImageDraw.Draw(emoji_layer)
     try:
         emoji_font = _load_emoji_font()

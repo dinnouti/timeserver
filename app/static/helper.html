@@ -110,7 +110,7 @@
     if (z === guessed) opt.selected = true;
     tzSel.appendChild(opt);
   }
-  jQuery(tzSel).select2({ width: 'resolve' });
+  jQuery(tzSel).select2({ width: 'resolve' }).on('change', refresh);
 
   function buildUrl(path) {
     const params = new URLSearchParams({
@@ -129,7 +129,7 @@
     previewImg.src = `${url}&_=${Date.now()}`;
   }
 
-  for (const el of [tzSel, startInp, endInp]) {
+  for (const el of [startInp, endInp]) {
     el.addEventListener('change', refresh);
     el.addEventListener('input', refresh);
   }
