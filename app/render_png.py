@@ -38,7 +38,7 @@ def render_png(state: TimeState) -> bytes:
     draw = ImageDraw.Draw(img)
 
     time_font = _load_font(TEXT_FONT_PATH, 32)
-    sub_font = _load_font(TEXT_FONT_PATH_REGULAR, 10)
+    sub_font = _load_font(TEXT_FONT_PATH_REGULAR, 12)
 
     emoji_layer = Image.new("RGBA", (EMOJI_FONT_NATIVE_SIZE, EMOJI_FONT_NATIVE_SIZE), (0, 0, 0, 0))
     emoji_draw = ImageDraw.Draw(emoji_layer)
